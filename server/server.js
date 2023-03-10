@@ -9,7 +9,7 @@ const httpServer = http.createServer(app);
 const wsServer = require("socket.io")(httpServer);
 
 // https서버
-httpServer.listen(process.env.PORT || 3001, () => console.log("Listening on port", process.env.PORT || 3001));
+httpServer.listen(process.env.PORT || 4000, () => console.log("Listening on port", process.env.PORT || 4000));
 
 const findParticipantWithNickName = (roomName, nickName) => {
   for (const socketId of wsServer.sockets.adapter.rooms.get(roomName)) {
