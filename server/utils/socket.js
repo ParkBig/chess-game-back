@@ -5,19 +5,41 @@ const socketHandler = (wsServer, socket) => {
     console.log(ev)
   });
 
-  socket.on("enterRoom", (roomName, goToRoom) => {
-    socket.join(roomName);
-    const { count, player } = countRoomParticipant(wsServer, roomName);
+  socket.on("enterRoom", (get, goToRoom) => {
+    socket.join(get.roomName);
+    const { count, player } = countRoomParticipant(wsServer, get.roomName);
     if (count === 1) {
-      wsServer.sockets.adapter.rooms.get(roomName)["readyArr"] = [];
+      wsServer.sockets.adapter.rooms.get(get.roomName)["readyArr"] = [];
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"] = {"player-1": null, "player-2": null}
     }
     socket["nickName"] = player;
+    if (get.loginInfo) {
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][player] = get.loginInfo
+    }
     if (count > 2) {
       goToRoom(false);
     } else {
       goToRoom(true);
     }
+    wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
   });
+
+  socket.on("when-reload-page", (get, goToHome) => {
+    wsServer.in(get.roomName).emit("initialize-ready");
+    if (wsServer.sockets.adapter.rooms.get(get.roomName)) {
+      for (const socketId of wsServer.sockets.adapter.rooms.get(get.roomName)) {
+        const participant = wsServer.sockets.sockets.get(socketId);
+        if (participant["nickName"] === "player-2") {
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]["player-1"] = null;
+        } else {
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]["player-2"] = null;
+        }
+      };
+      wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
+    }
+    goToHome("/");
+  });
+
   socket.on("leave-or-initialize-room", (get, goToHome) => {
     if (wsServer.sockets.adapter.rooms.get(get.roomName)?.size > 0) {
       if (wsServer.sockets.adapter.rooms.get(get.roomName)["readyArr"]) {
@@ -26,7 +48,9 @@ const socketHandler = (wsServer, socket) => {
     }
     if (get.state === "leave") {
       wsServer.in(get.roomName).emit("initialize-ready");
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][socket["nickName"]] = null
       socket["nickName"] = null;
+      wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
       socket.leave(get.roomName);
       if (goToHome) {
         goToHome("/");
