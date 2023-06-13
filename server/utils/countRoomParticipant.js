@@ -7,7 +7,7 @@ const findParticipantWithNickName = (wsServer, roomName, nickName) => {
   }
 };
 
-export const countRoomParticipant = (wsServer, roomName) => {
+const countRoomParticipant = (wsServer, roomName) => {
   const count = wsServer.sockets.adapter.rooms.get(roomName)?.size;
   if (count === 1) {
     return { count, player: "player-1" };
@@ -19,4 +19,8 @@ export const countRoomParticipant = (wsServer, roomName) => {
     return { count, player: "player-2" };
   }
   return { count, player: "null" };
+};
+
+module.exports = {
+  countRoomParticipant,
 };

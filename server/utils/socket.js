@@ -1,8 +1,8 @@
-const { countRoomParticipant } = require('./countRoomParticipant');
+const { countRoomParticipant } = require("./countRoomParticipant");
 
-export const socketHandler = (wsServer, socket) => {
+const socketHandler = (wsServer, socket) => {
   socket.onAny((ev) => {
-    console.log(ev)
+    console.log(ev);
   });
 
   socket.on("enterRoom", (get, goToRoom) => {
@@ -10,18 +10,27 @@ export const socketHandler = (wsServer, socket) => {
     const { count, player } = countRoomParticipant(wsServer, get.roomName);
     if (count === 1) {
       wsServer.sockets.adapter.rooms.get(get.roomName)["readyArr"] = [];
-      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"] = {"player-1": null, "player-2": null}
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"] = {
+        "player-1": null,
+        "player-2": null,
+      };
     }
     socket["nickName"] = player;
     if (get.loginInfo) {
-      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][player] = get.loginInfo
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][player] =
+        get.loginInfo;
     }
     if (count > 2) {
       goToRoom(false);
     } else {
       goToRoom(true);
     }
-    wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
+    wsServer
+      .in(get.roomName)
+      .emit(
+        "getLoginInfo",
+        wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]
+      );
   });
 
   socket.on("when-reload-page", (get, goToHome) => {
@@ -30,12 +39,21 @@ export const socketHandler = (wsServer, socket) => {
       for (const socketId of wsServer.sockets.adapter.rooms.get(get.roomName)) {
         const participant = wsServer.sockets.sockets.get(socketId);
         if (participant["nickName"] === "player-2") {
-          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]["player-1"] = null;
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][
+            "player-1"
+          ] = null;
         } else {
-          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]["player-2"] = null;
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][
+            "player-2"
+          ] = null;
         }
-      };
-      wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
+      }
+      wsServer
+        .in(get.roomName)
+        .emit(
+          "getLoginInfo",
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]
+        );
     }
     goToHome("/");
   });
@@ -48,9 +66,16 @@ export const socketHandler = (wsServer, socket) => {
     }
     if (get.state === "leave") {
       wsServer.in(get.roomName).emit("initialize-ready");
-      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][socket["nickName"]] = null
+      wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"][
+        socket["nickName"]
+      ] = null;
       socket["nickName"] = null;
-      wsServer.in(get.roomName).emit("getLoginInfo", wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]);
+      wsServer
+        .in(get.roomName)
+        .emit(
+          "getLoginInfo",
+          wsServer.sockets.adapter.rooms.get(get.roomName)["loginInfo"]
+        );
       socket.leave(get.roomName);
       if (goToHome) {
         goToHome("/");
@@ -102,4 +127,6 @@ export const socketHandler = (wsServer, socket) => {
   });
 };
 
-// export default socketHandler;
+module.exports = {
+  socketHandler,
+};

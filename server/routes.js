@@ -3,11 +3,11 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 const mongoClient = new MongoClient(MONGO_URL);
 
-export const handleGetRequest = async (req, res) => {
+const handleGetRequest = async (req, res) => {
   return res.status(201).json({ msg: "good work" })
 };
 
-export const handleLoginRequest = async (req, res) => {
+const handleLoginRequest = async (req, res) => {
   const { nickname, password } = req.body;
 
   try {
@@ -38,7 +38,7 @@ export const handleLoginRequest = async (req, res) => {
   }
 };
 
-export const handleGameResult = async (req, res) => {
+const handleGameResult = async (req, res) => {
   const { _id, isWin } = req.body;
   const objectId = new ObjectId(_id);
 
@@ -67,8 +67,8 @@ export const handleGameResult = async (req, res) => {
   }
 };
 
-// export default {
-//   handleGetRequest,
-//   handleLoginRequest,
-//   handleGameResult,
-// };
+module.exports = {
+  handleGetRequest,
+  handleLoginRequest,
+  handleGameResult,
+};
