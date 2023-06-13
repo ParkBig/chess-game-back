@@ -1,8 +1,8 @@
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
-const socketHandler = require("./utils/socket").default;
-const routes = require("./routes").default;
+const { socketHandler } = require("./utils/socket");
+const { handleGetRequest, handleLoginRequest, handleGameResult } = require("./routes");
 require("dotenv").config();
 
 const app = express();
@@ -18,9 +18,9 @@ httpServer.listen(process.env.PORT || 4000, () =>
 );
 
 // http
-app.get("/", routes.handleGetRequest);
-app.post("/login", routes.handleLoginRequest);
-app.post("/gameResult", routes.handleGameResult);
+app.get("/", handleGetRequest);
+app.post("/login", handleLoginRequest);
+app.post("/gameResult", handleGameResult);
 
 // socket.io
 wsServer.on("connection", (socket) => {

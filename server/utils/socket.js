@@ -1,6 +1,6 @@
 const { countRoomParticipant } = require('./countRoomParticipant');
 
-const socketHandler = (wsServer, socket) => {
+export const socketHandler = (wsServer, socket) => {
   socket.onAny((ev) => {
     console.log(ev)
   });
@@ -102,4 +102,4 @@ const socketHandler = (wsServer, socket) => {
   });
 };
 
-export default socketHandler;
+// export default socketHandler;
